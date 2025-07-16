@@ -11,7 +11,7 @@ const app = express();
 const port = 5000;
 
 // MongoDB setup with Mongoose
-const mongoUrl = 'mongodb+srv://nykahlouche:StepJI0FjnjDODwT@cluster0.afddz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'; // Replace with your MongoDB connection string
+const mongoUrl = 'mongodb+srv://nykahlouche:74jBDeqo0Xd4phL5@cluster0.xzhv1pf.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'; // Replace with your MongoDB connection string
 mongoose.connect(mongoUrl)
   .then(() => console.log('Connected to MongoDB'))
   .catch((error) => {
@@ -19,9 +19,7 @@ mongoose.connect(mongoUrl)
     process.exit(1);
   });
 
-// Mongoose Schemas
 const userSchema = new mongoose.Schema({
-  // Dynamic fields will be stored as a flexible object
 }, { strict: false });
 
 const headerSchema = new mongoose.Schema({
@@ -39,12 +37,11 @@ app.use(express.json());
 // CSV upload configuration
 const upload = multer({ dest: 'uploads/' });
 
-// Nodemailer transporter (configure with your SMTP settings)
 const transporter = nodemailer.createTransport({
-  service: 'gmail', // Replace with your email service
+  service: 'gmail', 
   auth: {
-    user: 'tedxuniversityofalgiers@gmail.com', // Replace with your email
-    pass: 'kspa xsof hlgc iwre', // Replace with your app-specific password
+    user: 'tedxuniversityofalgiers@gmail.com', 
+    pass: 'kspa xsof hlgc iwre', 
   },
 });
 
@@ -120,7 +117,7 @@ app.post('/api/email/send', async (req, res) => {
     const users = await User.find({});
     for (const user of users) {
       const mailOptions = {
-        from: 'your-email@gmail.com', // Replace with your email
+        from: 'tedxuniversityofalgiers@gmail.com', 
         to: user.email,
         subject,
         [isHtml ? 'html' : 'text']: body,

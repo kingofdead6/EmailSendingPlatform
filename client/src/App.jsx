@@ -12,6 +12,9 @@ const App = () => {
   const [isCsvModalOpen, setIsCsvModalOpen] = useState(false);
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
 
+  // Dynamic base URL from environment variable
+  const API_BASE_URL = 'http://localhost:5000';
+
   // Fetch users and headers on component mount
   useEffect(() => {
     fetchUsers();
@@ -20,7 +23,7 @@ const App = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/users');
+      const response = await axios.get(`${API_BASE_URL}/api/users`);
       setUsers(response.data);
     } catch (error) {
       setMessage('Error fetching users: ' + error.message);
@@ -29,7 +32,7 @@ const App = () => {
 
   const fetchHeaders = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/headers');
+      const response = await axios.get(`${API_BASE_URL}/api/headers`);
       setHeaders(response.data.headers || []);
     } catch (error) {
       setMessage('Error fetching headers: ' + error.message);
@@ -45,7 +48,7 @@ const App = () => {
     const formData = new FormData();
     formData.append('file', csvFile);
     try {
-      await axios.post('http://localhost:5000/api/users/upload', formData, {
+      await axios.post(`${API_BASE_URL}/api/users/upload`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       setMessage('Users uploaded successfully');
@@ -61,7 +64,7 @@ const App = () => {
   const handleSendEmail = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/api/email/send', {
+      await axios.post(`${API_BASE_URL}/api/email/send`, {
         subject: emailSubject,
         body: emailBody,
         isHtml,
@@ -79,7 +82,7 @@ const App = () => {
   const handleDeleteAll = async () => {
     if (window.confirm('Are you sure you want to delete all users?')) {
       try {
-        await axios.delete('http://localhost:5000/api/users/delete-all');
+        await axios.delete(`${API_BASE_URL}/api/users/delete-all`);
         setMessage('All users deleted successfully');
         fetchUsers();
         fetchHeaders();
@@ -90,63 +93,81 @@ const App = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-gray-100 p-8 font-sans">
-      <div className="max-w-5xl mx-auto bg-white rounded-2xl shadow-xl p-8">
-        <h1 className="text-4xl font-extrabold text-center text-gray-800 mb-8">User Management Dashboard</h1>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-gray-100 to-teal-50 p-10 font-sans">
+      <div className="max-w-6xl mx-auto bg-white rounded-3xl shadow-2xl p-10 transition-all duration-300">
+        <h1 className="text-5xl font-extrabold text-center text-indigo-900 mb-10 tracking-tight">
+          UserSync Dashboard
+        </h1>
 
         {/* Message Display */}
         {message && (
-          <div className={`mb-6 p-4 rounded-lg text-center ${message.includes('Error') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+          <div
+            className={`mb-8 p-5 rounded-xl text-center font-medium text-lg transition-opacity duration-300 ${
+              message.includes('Error')
+                ? 'bg-red-100 text-red-800 border border-red-300'
+                : 'bg-teal-100 text-teal-800 border border-teal-300'
+            }`}
+          >
             {message}
           </div>
         )}
 
         {/* Action Buttons */}
-        <div className="flex justify-between mb-6">
+        <div className="flex flex-wrap gap-4 mb-8 justify-center">
           <button
             onClick={() => setIsCsvModalOpen(true)}
-            className="bg-blue-600 text-white py-2 px-6 rounded-lg hover:bg-blue-700 transition duration-200"
+            className="cursor-pointer bg-indigo-600 text-white py-3 px-8 rounded-xl hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-300 transition duration-200 font-semibold shadow-md"
           >
             Upload CSV
           </button>
           <button
             onClick={() => setIsEmailModalOpen(true)}
-            className="bg-green-600 text-white py-2 px-6 rounded-lg hover:bg-green-700 transition duration-200"
+            className="cursor-pointer bg-teal-600 text-white py-3 px-8 rounded-xl hover:bg-teal-700 focus:ring-4 focus:ring-teal-300 transition duration-200 font-semibold shadow-md"
           >
             Send Email
           </button>
           <button
             onClick={handleDeleteAll}
-            className="bg-red-600 text-white py-2 px-6 rounded-lg hover:bg-red-700 transition duration-200"
+            className="cursor-pointer bg-red-600 text-white py-3 px-8 rounded-xl hover:bg-red-700 focus:ring-4 focus:ring-red-300 transition duration-200 font-semibold shadow-md"
           >
             Delete All Users
           </button>
         </div>
 
         {/* User Table */}
-        <div className="bg-gray-50 p-6 rounded-lg shadow-md">
-          <h2 className="text-2xl font-semibold text-gray-700 mb-4">Users</h2>
+        <div className="bg-gray-50 p-8 rounded-xl shadow-inner">
+          <h2 className="text-3xl font-semibold text-indigo-900 mb-6">Users</h2>
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
               <thead>
-                <tr className="bg-blue-100">
+                <tr className="bg-indigo-100">
                   {headers.length > 0 ? (
                     headers.map((header, index) => (
-                      <th key={index} className="border border-gray-300 p-3 text-left text-gray-600">
+                      <th
+                        key={index}
+                        className="border border-indigo-200 p-4 text-left text-indigo-700 font-medium uppercase tracking-wider"
+                      >
                         {header}
                       </th>
                     ))
                   ) : (
-                    <th className="border border-gray-300 p-3 text-center">No headers available</th>
+                    <th className="border border-indigo-200 p-4 text-center text-indigo-700">
+                      No headers available
+                    </th>
                   )}
                 </tr>
               </thead>
               <tbody>
                 {users.length > 0 ? (
                   users.map((user, index) => (
-                    <tr key={index} className="hover:bg-blue-50 transition duration-150">
+                    <tr
+                      key={index}
+                      className={`${
+                        index % 2 === 0 ? 'bg-white' : 'bg-indigo-50'
+                      } hover:bg-indigo-100 transition duration-150`}
+                    >
                       {headers.map((header, hIndex) => (
-                        <td key={hIndex} className="border border-gray-300 p-3">
+                        <td key={hIndex} className="border border-indigo-200 p-4 text-gray-700">
                           {user[header] || '-'}
                         </td>
                       ))}
@@ -154,7 +175,10 @@ const App = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={headers.length || 1} className="border border-gray-300 p-3 text-center text-gray-600">
+                    <td
+                      colSpan={headers.length || 1}
+                      className="border border-indigo-200 p-4 text-center text-gray-600"
+                    >
                       No users found
                     </td>
                   </tr>
@@ -166,27 +190,27 @@ const App = () => {
 
         {/* CSV Upload Modal */}
         {isCsvModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md">
-              <h2 className="text-2xl font-semibold mb-4 text-gray-700">Upload Users (CSV)</h2>
-              <form onSubmit={handleCsvUpload} className="flex flex-col gap-4">
+          <div className="fixed inset-0 bg-[#0000004f] backdrop-blur-md flex items-center justify-center transition-opacity duration-300">
+            <div className="bg-white rounded-2xl p-8 w-full max-w-lg shadow-2xl transform transition-all duration-300 scale-100">
+              <h2 className="text-2xl font-semibold mb-6 text-indigo-900">Upload Users (CSV)</h2>
+              <form onSubmit={handleCsvUpload} className="flex flex-col gap-5">
                 <input
                   type="file"
                   accept=".csv"
                   onChange={(e) => setCsvFile(e.target.files[0])}
-                  className="border border-gray-300 p-2 rounded-lg"
+                  className="border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-indigo-300 focus:border-indigo-500 transition duration-200"
                 />
-                <div className="flex justify-end gap-2">
+                <div className="flex justify-end gap-3">
                   <button
                     type="button"
                     onClick={() => setIsCsvModalOpen(false)}
-                    className="bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 transition duration-200"
+                    className="cursor-pointer bg-gray-200 text-gray-800 py-2 px-6 rounded-lg hover:bg-gray-300 focus:ring-2 focus:ring-gray-300 transition duration-200 font-medium"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200"
+                    className="cursor-pointer bg-indigo-600 text-white py-2 px-6 rounded-lg hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-300 transition duration-200 font-medium"
                   >
                     Upload
                   </button>
@@ -198,43 +222,43 @@ const App = () => {
 
         {/* Email Modal */}
         {isEmailModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md">
-              <h2 className="text-2xl font-semibold mb-4 text-gray-700">Send Email to All Users</h2>
-              <form onSubmit={handleSendEmail} className="flex flex-col gap-4">
+          <div className="fixed inset-0 bg-[#0000004f] backdrop-blur-md  flex items-center justify-center transition-opacity duration-300">
+            <div className="bg-white rounded-2xl p-8 w-full max-w-lg shadow-2xl transform transition-all duration-300 scale-100">
+              <h2 className="text-2xl font-semibold mb-6 text-indigo-900">Send Email to All Users</h2>
+              <form onSubmit={handleSendEmail} className="flex flex-col gap-5">
                 <div className="flex items-center">
                   <input
                     type="checkbox"
                     checked={isHtml}
                     onChange={() => setIsHtml(!isHtml)}
-                    className="mr-2"
+                    className="cursor-pointer h-5 w-5 text-indigo-600 focus:ring-indigo-300"
                   />
-                  <label className="text-gray-600">Send as HTML</label>
+                  <label className="ml-2 text-gray-700 font-medium">Send as HTML</label>
                 </div>
                 <input
                   type="text"
                   placeholder="Email Subject"
                   value={emailSubject}
                   onChange={(e) => setEmailSubject(e.target.value)}
-                  className="border border-gray-300 p-2 rounded-lg"
+                  className="border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-indigo-300 focus:border-indigo-500 transition duration-200"
                 />
                 <textarea
                   placeholder={isHtml ? "Enter HTML content" : "Enter plain text email"}
                   value={emailBody}
                   onChange={(e) => setEmailBody(e.target.value)}
-                  className="border border-gray-300 p-2 rounded-lg h-40"
+                  className="border border-gray-300 p-3 rounded-lg h-48 focus:ring-2 focus:ring-indigo-300 focus:border-indigo-500 transition duration-200"
                 />
-                <div className="flex justify-end gap-2">
+                <div className="flex justify-end gap-3">
                   <button
                     type="button"
                     onClick={() => setIsEmailModalOpen(false)}
-                    className="bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 transition duration-200"
+                    className="cursor-pointer bg-gray-200 text-gray-800 py-2 px-6 rounded-lg hover:bg-gray-300 focus:ring-2 focus:ring-gray-300 transition duration-200 font-medium"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition duration-200"
+                    className="cursor-pointer bg-teal-600 text-white py-2 px-6 rounded-lg hover:bg-teal-700 focus:ring-2 focus:ring-teal-300 transition duration-200 font-medium"
                   >
                     Send
                   </button>
