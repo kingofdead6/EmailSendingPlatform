@@ -13,7 +13,7 @@ const App = () => {
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
 
   // Dynamic base URL from environment variable
-  const API_BASE_URL = 'http://localhost:5000';
+  const API_BASE_URL = 'https://emailsendingplatform.onrender.com';
 
   // Fetch users and headers on component mount
   useEffect(() => {
