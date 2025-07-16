@@ -4,6 +4,7 @@ import multer from 'multer';
 import csvParser from 'csv-parser';
 import mongoose from 'mongoose';
 import nodemailer from 'nodemailer';
+import QRCode from 'qrcode';
 import fs from 'fs';
 import { pipeline } from 'stream/promises';
 
@@ -19,6 +20,7 @@ mongoose.connect(mongoUrl)
     process.exit(1);
   });
 
+// Mongoose Schemas
 const userSchema = new mongoose.Schema({
 }, { strict: false });
 
@@ -37,11 +39,12 @@ app.use(express.json());
 // CSV upload configuration
 const upload = multer({ dest: 'uploads/' });
 
+// Nodemailer transporter (configure with your SMTP settings)
 const transporter = nodemailer.createTransport({
-  service: 'gmail', 
+  service: 'gmail', // Replace with your email service
   auth: {
-    user: 'tedxuniversityofalgiers@gmail.com', 
-    pass: 'kspa xsof hlgc iwre', 
+    user: 'tedxuniversityofalgiers@gmail.com', // Replace with your email
+    pass: 'kspa xsof hlgc iwre', // Replace with your app-specific password
   },
 });
 
@@ -110,18 +113,29 @@ app.delete('/api/users/delete-all', async (req, res) => {
   }
 });
 
-// Send email to all users
+// Send email to all users with QR code
 app.post('/api/email/send', async (req, res) => {
   const { subject, body, isHtml } = req.body;
   try {
     const users = await User.find({});
     for (const user of users) {
+      // Generate QR code with user data
+      const qrData = JSON.stringify(user.toObject());
+      const qrCodeBuffer = await QRCode.toBuffer(qrData, { type: 'png' });
+
+      // Prepare email content
       const mailOptions = {
-        from: 'tedxuniversityofalgiers@gmail.com', 
+        from: 'tedxuniversityofalgiers@gmail.com', // Replace with your email
         to: user.email,
         subject,
-        [isHtml ? 'html' : 'text']: body,
+        [isHtml ? 'html' : 'text']: isHtml
+          ? `${body}<br><br><p>Please find your QR code attached, you will enter to the event using it.</p>`
+          : `${body}\n\nPlease find your QR code attached, you will enter to the event using it.`,
+        attachments: [
+          { filename: 'user-qr-code.png', content: qrCodeBuffer, contentType: 'image/png' },
+        ],
       };
+
       await transporter.sendMail(mailOptions);
     }
     res.status(200).send('Emails sent successfully');
